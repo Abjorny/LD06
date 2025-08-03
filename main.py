@@ -10,11 +10,10 @@ points = {
 }
 for i in range(225, 316):
     points = points | {i: 0} 
+points[240] = 2
 
 max_range = 2
-
-
-mashtab = size_window / max_range
+mashtab = (size_window / 2)
 
 font = cv2.FONT_HERSHEY_COMPLEX
 tables = 5
@@ -28,14 +27,12 @@ ldar = LD06_DRIVER()
 def update_points():
     while 1:
         data = ldar.read_data()
-        
         for point in data: 
             dist = point[0]
-            angle = int(round(point[1], 0))
-            
+            angle = int(round(point[2], 0))
             if 225 < angle < 315:
-                if dist > 2:
-                    dist = 2
+                if dist > max_range:
+                    dist = max_range
                 try:
                     points[angle] = dist
                 except:
@@ -52,25 +49,25 @@ def draw_rows(img):
             if d % radiant_row == 0:
                 cv2.line(img, ( d * radiant_row , y), (radiant_row * d + radiant_row  , y), (255, 0, 0), 2)
 
+
 def draw_point(img):
+
+    a_min = max_range * math.cos(math.radians(225))
+    a_max = max_range * math.cos(math.radians(315))
+
     for angle, c in points.items():
-            if c !=0:
-                c =abs( c * mashtab  )
-                b = (c * math.sin(angle - 180))
-                a = (c * math.cos(angle - 180))
+        if c != 0:
+            c = abs(c)
+            radians = math.radians(angle)
+            a = c * math.cos(radians)
+            b = c * math.sin(radians)
+            x = int((a - a_min) / (a_max - a_min) * size_window)
+            y = int((1 - c / max_range) * size_window)
 
-                x = size_window / 2
-          
-                if angle > 270 :
-                    x += a
-                elif angle < 270:
-                    x -= a
+            cv2.circle(img, (x, y), 5, (0, 0, 255), thickness=-1, lineType=cv2.LINE_AA)
 
-                x = int(x)
-                y = int(abs(b) )
-                print(c, y , a, x)
 
-                cv2.circle(img, (x, y), 5, (0, 0, 255), thickness=-1, lineType=cv2.LINE_AA);
+
 
 thread = threading.Thread(target=update_points, daemon= True).start()
 while 1:

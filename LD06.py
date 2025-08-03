@@ -28,10 +28,16 @@ class LD06_DRIVER:
                 points.append((dist, intes))
                 offset += 3
 
-            end_angle = (package[offset] + package[offset + 1] * 256) / 100.0
             timestamp = package[offset + 2] + package[offset + 3] * 256
-            step = (end_angle - start_angle) / (point_count - 1)
-            
+            start_angle = (package[4] + package[5] * 256) / 100.0
+            end_angle = (package[offset] + package[offset + 1] * 256) / 100.0
+
+            # Учитываем возможность, что end_angle < start_angle, тогда добавляем 360 градусов
+            if end_angle < start_angle:
+                end_angle += 360
+
+            step = (end_angle - start_angle) / point_count
+
 
 
             for i in range(point_count):
