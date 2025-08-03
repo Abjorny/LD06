@@ -14,6 +14,7 @@ class LD06_DRIVER:
 
     def __package_parser(self, package):
         point_count = package[1] & 0b00011111
+        result_points = []
         if point_count == 12:
             radar_speed = package[2] + package[3] * 256
             start_angle = (package[4] + package[5] * 256) / 100.0
@@ -30,7 +31,7 @@ class LD06_DRIVER:
             end_angle = (package[offset] + package[offset + 1] * 256) / 100.0
             timestamp = package[offset + 2] + package[offset + 3] * 256
             step = (end_angle - start_angle) / (point_count - 1)
-            result_points = []
+            
 
 
             for i in range(point_count):
@@ -40,7 +41,7 @@ class LD06_DRIVER:
                 intes = points[i][1] 
                 result_points.append((dist, intes, angle))
 
-            return result_points
+        return result_points
 
     def read_data(self):
         package = self.__read_package()
